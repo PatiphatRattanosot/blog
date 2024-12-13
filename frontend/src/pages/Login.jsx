@@ -1,13 +1,45 @@
-import React, { useState } from 'react'
-
+import React, { useEffect, useState } from 'react'
+import AuthServices from '../services/auth.service';
+import { useNavigate } from "react-router";
+import { useAuthContext } from '../context/AuthContext';
 function Login() {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [user, setUser] = useState({
+        username: "",
+        password: ""
+    });
+
+    const { user: loggedUser } = useAuthContext()
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (loggedUser) {
+            console.log(loggedUser);
+
+        }
+    }, [loggedUser])
+    const handleChange = (e) => {
+        const { name, value } = e.target
+        setUser((user) => ({ ...user, [name]: value }))
+    }
+
+    const handleSubmit = async () => {
+        try {
+            const response = await AuthServices.login(user.username, user.password)
+            console.log(response);
+
+            if (response.status === 200) {
+                navigate("/")
+            }
+        } catch (error) {
+
+        }
+    }
 
     return (
         <div className="">
             <div className="space-y-4">
-
+                <h2>Login Page</h2>
                 <label className="input input-bordered flex items-center gap-2">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -21,8 +53,10 @@ function Login() {
                         type="text"
                         className="grow"
                         placeholder="Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        name="username"
+                        value={user.username}
+
+                        onChange={handleChange}
                     />
                 </label>
 
@@ -41,14 +75,17 @@ function Login() {
                         type="password"
                         className="grow"
                         placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        name="password"
+                        value={user.password}
+
+                        onChange={handleChange}
                     />
                 </label>
 
                 <div className="flex justify-center">
                     <button
                         type="submit"
+                        onClick={handleSubmit}
                         className="btn btn-primary w-full">
                         Login
                     </button>
